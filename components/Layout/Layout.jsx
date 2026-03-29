@@ -10,6 +10,7 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { menuList } from "../../utils/menuList.jsx";
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -39,29 +40,14 @@ const Layout = ({ children }) => {
 
           {/* Menu section */}
           <nav className="p-4 space-y-1.5 overflow-y-auto">
-            <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-4">
-              Main Menu
-            </p>
-
-            <Link to="/" className={getLinkClass("/")}>
-              <LayoutDashboard size={20} />
-              <span className="font-medium">Dashboard</span>
-            </Link>
-
-            <Link to="/messages" className={getLinkClass("/messages")}>
-              <Mail size={20} />
-              <span className="font-medium">Messages</span>
-            </Link>
-
-            <Link to="/contact" className={getLinkClass("/contact")}>
-              <Phone size={20} />
-              <span className="font-medium">Contact</span>
-            </Link>
-
-            <Link to="/blog" className={getLinkClass("/blog")}>
-              <FileText size={20} />
-              <span className="font-medium">Blog</span>
-            </Link>
+            {menuList.map((menu, id) => {
+              return (
+                <Link to={menu.href} className={getLinkClass(menu.href)}>
+                  {menu.icon}
+                  <span className="font-medium">{menu.name}</span>
+                </Link>
+              );
+            })}
           </nav>
         </div>
 

@@ -12,12 +12,15 @@ import Messages from "../components/Message/MassageSection";
 
 import LoginPage from "../components/Auth/LoginPage";
 import Layout from "../components/Layout/Layout";
+import Categories from "../components/Categories/Categories";
+import Subscriber from "../components/subscriber/Subscriber";
+import Settings from "../components/Setting/Setting";
 
 // ==========================================
 // 1. Protected Route Wrapper Component
 // ==========================================
 const ProtectedRoute = () => {
-  let isAuthenticated = false;
+  let isAuthenticated = true;
 
   if (localStorage.getItem("token")) {
     isAuthenticated = true;
@@ -49,6 +52,11 @@ const App = () => {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Home />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/categories" element={<Categories />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<div>Profile</div>} />
+          <Route path="/subscriber" element={<Subscriber />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
     </BrowserRouter>
