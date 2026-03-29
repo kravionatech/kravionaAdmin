@@ -1,93 +1,129 @@
-import React, { useState } from "react";
-import { Trash2, Link as LinkIcon, Plus } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Loader2, FileText, Film } from "lucide-react";
+import { toast } from "react-toastify"; // Ensure toastify is available or remove if not needed here
 
 const ShowAllImage = ({ chooseImage, imageModel, setImageModel }) => {
-  // 10 Dummy images with an aesthetic matching your teal/terracotta palette
-  const [images, setImages] = useState([
-    {
-      id: 1,
-      url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=500&q=80",
-      name: "Modern Lounge",
-    },
-    {
-      id: 2,
-      url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&q=80",
-      name: "Teal Office",
-    },
-    {
-      id: 3,
-      url: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?w=500&q=80",
-      name: "Minimalist Desk",
-    },
-    {
-      id: 4,
-      url: "https://images.unsplash.com/photo-1534349762230-e0cadf78f505?w=500&q=80",
-      name: "Terracotta Vase",
-    },
-    {
-      id: 5,
-      url: "https://images.unsplash.com/photo-1513519247388-193ad513d746?w=500&q=80",
-      name: "Abstract Teal",
-    },
-    {
-      id: 6,
-      url: "https://images.unsplash.com/photo-1594913785162-e6785b423cb1?w=500&q=80",
-      name: "Clay Pottery",
-    },
-    {
-      id: 7,
-      url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=500&q=80",
-      name: "Tech Setup",
-    },
-    {
-      id: 8,
-      url: "https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?w=500&q=80",
-      name: "Mood Lighting",
-    },
-    {
-      id: 9,
-      url: "https://www.kisworks.com/blog/wp-content/uploads/2024/06/Top-10-Reasons-to-Choose-an-Indian-Website-Development-Company-in-2024-.jpg",
-      name: "Interior Detail",
-    },
-    {
-      id: 10,
-      url: "https://bigblue.academy/images/image/blog/what-is-machine-learning-2023-beginners-guide/1-3cxboknql4qs-lryht3pqw.jpg",
-      name: "Architecture",
-    },
-  ]);
+  const [files, setFiles] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch all media files from the API
+  useEffect(() => {
+    const fetchMedia = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_API}/files`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+        const data = await response.json();
+
+        if (data.success) {
+          setFiles(data.files || []);
+        } else {
+          toast.error("Failed to load images");
+        }
+      } catch (error) {
+        console.error("Error fetching media:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMedia();
+  }, []);
+
+  // Helper to determine file type for UI rendering
+  const getFileCategory = (format) => {
+    const fmt = format?.toLowerCase() || "";
+    if (["jpg", "jpeg", "png", "webp", "gif"].includes(fmt)) return "image";
+    if (["mp4", "webm"].includes(fmt)) return "video";
+    return "other";
+  };
 
   return (
-    <div className="h-[70vh] w-full bg-[#11393b]  p-8 text-white overflow-y-scroll">
-      {/* Image Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {images.map((img) => (
-          <div
-            onClick={() => {
-              chooseImage({ ...img });
-              setImageModel(!imageModel);
-            }}
-            key={img.id}
-            className="group relative bg-[#295c5e]/10 border border-[#295c5e]/30 rounded-2xl overflow-hidden hover:border-[#f4be78]/50 transition-all duration-300"
-          >
-            {/* Image Preview */}
-            <div className="aspect-square overflow-hidden">
-              <img
-                src={img.url}
-                alt={img.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-            </div>
+    <div className="h-[70vh] w-full bg-[#11393b] p-8 text-white overflow-y-scroll custom-scrollbar">
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+          <Loader2 className="animate-spin text-[#f4be78]" size={40} />
+          <p className="text-[#295c5e] font-medium">Loading your media...</p>
+        </div>
+      ) : files.length === 0 ? (
+        /* Empty State */
+        <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-gray-400">
+          <p>No media files found.</p>
+        </div>
+      ) : (
+        /* Image Grid */
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {files.map((file) => {
+            const category = getFileCategory(file.format);
 
-            {/* Label */}
-            <div className="p-3 bg-[#0f2425]/80 backdrop-blur-sm border-t border-[#295c5e]/30">
-              <p className="text-xs font-medium text-gray-300 truncate">
-                {img.name}
-              </p>
-              <p className="text-[10px] text-[#295c5e]">1200 x 800 px</p>
-            </div>
-          </div>
-        ))}
-      </div>
+            return (
+              <div
+                key={file._id}
+                onClick={() => {
+                  chooseImage(file); // Passing the entire file object to the parent
+                  setImageModel(!imageModel);
+                }}
+                className="group relative bg-[#295c5e]/10 border border-[#295c5e]/30 rounded-2xl overflow-hidden hover:border-[#f4be78]/50 cursor-pointer shadow-lg hover:shadow-[#f4be78]/10 transition-all duration-300"
+              >
+                {/* Media Preview */}
+                <div className="aspect-square bg-[#0a2425] overflow-hidden flex items-center justify-center relative">
+                  {category === "image" ? (
+                    <img
+                      src={file.url}
+                      alt={file.filename}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  ) : category === "video" ? (
+                    <div className="flex flex-col items-center gap-2 text-[#295c5e] group-hover:text-[#f4be78] transition-colors">
+                      <Film size={40} />
+                      <span className="text-xs font-bold uppercase">
+                        {file.format}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 text-[#295c5e] group-hover:text-[#f4be78] transition-colors">
+                      <FileText size={40} />
+                      <span className="text-xs font-bold uppercase">
+                        {file.format}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Format Badge overlay on images */}
+                  <div className="absolute top-2 right-2 px-2 py-0.5 bg-[#0f2425]/80 backdrop-blur-md rounded border border-[#295c5e]/50 text-[9px] font-bold text-gray-300 uppercase">
+                    {file.format}
+                  </div>
+                </div>
+
+                {/* Info Label */}
+                <div className="p-3 bg-[#0f2425]/90 backdrop-blur-sm border-t border-[#295c5e]/30">
+                  <p
+                    className="text-xs font-medium text-gray-200 truncate"
+                    title={file.filename}
+                  >
+                    {file.filename}
+                  </p>
+                  <div className="flex justify-between items-center mt-1">
+                    <p className="text-[10px] text-[#295c5e]">
+                      {(file.size / 1024).toFixed(1)} KB
+                    </p>
+                    <p className="text-[10px] text-gray-500">
+                      {new Date(file.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

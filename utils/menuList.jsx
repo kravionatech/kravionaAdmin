@@ -33,7 +33,7 @@ export const menuList = [
   },
   {
     name: "Medias",
-    href: "/files",
+    href: "/media-library",
     icon: <LayoutDashboard />,
     size: 20,
   },

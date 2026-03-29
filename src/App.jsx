@@ -15,6 +15,7 @@ import Layout from "../components/Layout/Layout";
 import Categories from "../components/Categories/Categories";
 import Subscriber from "../components/subscriber/Subscriber";
 import Settings from "../components/Setting/Setting";
+import MediaLibrary from "../components/media/MediaLibrary";
 
 // ==========================================
 // 1. Protected Route Wrapper Component
@@ -54,7 +55,7 @@ const App = () => {
           <Route path="/messages" element={<Messages />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/profile" element={<div>Profile</div>} />
+          <Route path="/media-library" element={<MediaLibrary />} />
           <Route path="/subscriber" element={<Subscriber />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

@@ -1,1 +1,10 @@
 @import "tailwindcss";
+@keyframes progress-strip {
+  0% { width: 0%; }
+  50% { width: 70%; }
+  100% { width: 100%; }
+}
+
+.animate-progress-strip {
+  animation: progress-strip 2s infinite ease-in-out;
+}
