@@ -1,24 +1,47 @@
 import React, { useRef, useEffect, useState } from "react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
-import { X, Save, Send, Plus, ImageIcon } from "lucide-react";
+import {
+  X,
+  Save,
+  Send,
+  Plus,
+  ImageIcon,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import ShowAllImage from "../image/ShowAllImage";
 
-const NewPost = () => {
+const NewPost = ({ newPostModel, setNewPostModel }) => {
   const editorRef = useRef(null);
   const quillRef = useRef(null);
+
+  // Form States (Removed expert)
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    category: "",
+    metaTitle: "",
+    metaDescription: "",
+  });
+
+  // Category State
+  const [categories, setCategories] = useState([]);
 
   // Keyword States
   const [keywords, setKeywords] = useState([]);
   const [keywordInput, setKeywordInput] = useState("");
 
+  // Status & Validation States
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+
   // Image States
   const [imageModel, setImageModel] = useState(false);
-  const [image, setImage] = useState({
-    url: "https://img.freepik.com/free-photo/closeup-shot-beautiful-butterfly-with-interesting-textures-orange-petaled-flower_181624-7640.jpg?semt=ais_incoming&w=740&q=80",
-    name: "Featured Flower",
-  });
+  const [image, setImage] = useState(null);
 
+  // Initialize Quill Editor
   useEffect(() => {
     if (!quillRef.current && editorRef.current) {
       quillRef.current = new Quill(editorRef.current, {
@@ -26,31 +49,50 @@ const NewPost = () => {
         placeholder: "Start typing your masterpiece...",
         modules: {
           toolbar: [
-            // 1. Text Style & Sizes
             [{ header: [1, 2, 3, 4, false] }],
             [{ font: [] }, { size: ["small", false, "large", "huge"] }],
-
-            // 2. Emphasis & Color
             ["bold", "italic", "underline", "strike"],
             [{ color: [] }, { background: [] }],
             ["blockquote", "code-block"],
-
-            // 3. Alignment & Lists
             [{ align: [] }],
             [{ list: "ordered" }, { list: "bullet" }, { list: "check" }],
             [{ indent: "-1" }, { indent: "+1" }],
-
-            // 4. Media & Links
             ["link", "image", "video"],
             [{ script: "sub" }, { script: "super" }],
-
-            // 5. Cleanup
             ["clean"],
           ],
         },
       });
     }
   }, []);
+
+  // Fetch Categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const apiUrl =
+          import.meta.env.VITE_BACKEND_API || "https://api.kraviona.com/api";
+        const response = await fetch(`${apiUrl}/categories/public`);
+        const data = await response.json();
+
+        if (response.ok) {
+          // Adapt based on your actual API response structure (e.g., data.categories, data.data, or just data)
+          setCategories(data.categories || data.data || data || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Handlers for Form Data
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (error) setError(null);
+  };
 
   // Keyword Handlers
   const handleAddKeyword = (e) => {
@@ -73,10 +115,103 @@ const NewPost = () => {
     setKeywords(keywords.filter((keyword) => keyword !== keywordToRemove));
   };
 
-  // Image Selection Handler
   const chooseImage = (selectedImage) => {
     setImage(selectedImage);
-    setImageModel(false); // Close the modal after selecting
+    setImageModel(false);
+  };
+
+  // --- Validation & API Submission ---
+  const validateForm = (content) => {
+    if (!formData.title.trim()) return "Title is required.";
+    if (!content || content === "<p><br></p>")
+      return "Post content cannot be empty.";
+    if (!formData.category) return "Category is required.";
+    if (!image?.url) return "A featured image (thumbnail) is required.";
+    return null;
+  };
+
+  const handleSubmit = async (status) => {
+    setError(null);
+    setSuccess(null);
+    setIsLoading(true);
+
+    try {
+      const content = quillRef.current.root.innerHTML;
+
+      // 1. Validation Check
+      const validationError = validateForm(content);
+      if (validationError) {
+        setError(validationError);
+        setIsLoading(false);
+        return;
+      }
+
+      // 2. Prepare Payload (Removed expert)
+      const payload = {
+        title: formData.title,
+        content: content,
+        description: formData.description,
+        category: formData.category,
+        status: status, // "published" or "draft"
+        thumbnail: image.url,
+        metaTitle: formData.metaTitle,
+        metaDescription: formData.metaDescription,
+        keywords: keywords,
+      };
+
+      // 3. Auth Check
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication token missing. Please log in again.");
+      }
+
+      // 4. API Request
+      const apiUrl =
+        import.meta.env.VITE_BACKEND_API || "https://api.kraviona.com/api";
+      const response = await fetch(`${apiUrl}/post/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to create post. Please try again.",
+        );
+      }
+
+      // 5. Success Handling & Form Reset
+      setSuccess(`Post successfully saved as ${status}!`);
+
+      // Clear all fields
+      setFormData({
+        title: "",
+        description: "",
+        category: "",
+        metaTitle: "",
+        metaDescription: "",
+      });
+      setKeywords([]);
+      setImage(null);
+      if (quillRef.current) {
+        quillRef.current.root.innerHTML = "";
+      }
+
+      // Close modal after 1.5 seconds so user can read the success message
+      setTimeout(() => {
+        setSuccess(null);
+        if (setNewPostModel) setNewPostModel(false);
+      }, 1500);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -91,23 +226,43 @@ const NewPost = () => {
             Write original content for your blog
           </p>
         </div>
-        <button className="w-8 h-8 bg-rose-50 text-rose-500 shadow-sm rounded-full flex items-center justify-center hover:bg-rose-100 transition-colors">
+        <button
+          onClick={() => {
+            setNewPostModel(!newPostModel);
+          }}
+          className="w-8 h-8 bg-rose-50 text-rose-500 shadow-sm rounded-full flex items-center justify-center hover:bg-rose-100 transition-colors"
+        >
           <X size={16} />
         </button>
       </div>
 
+      {/* Notifications */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl flex items-center gap-2 text-sm">
+          <AlertCircle size={18} /> {error}
+        </div>
+      )}
+      {success && (
+        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-xl flex items-center gap-2 text-sm">
+          <CheckCircle2 size={18} /> {success}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* LEFT SIDE */}
+        {/* LEFT SIDE - Content */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           <div className="flex flex-col gap-1">
             <label
               htmlFor="title"
               className="text-sm font-medium text-gray-700"
             >
-              Title
+              Title <span className="text-red-500">*</span>
             </label>
             <input
               id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleInputChange}
               type="text"
               placeholder="Add title with focus keyword"
               className="w-full text-sm px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#295c5e]/20 focus:border-[#295c5e] outline-none transition-all shadow-sm"
@@ -123,21 +278,61 @@ const NewPost = () => {
           </div>
         </div>
 
-        {/* RIGHT SIDEBAR */}
+        {/* RIGHT SIDEBAR - Settings & Publishing */}
         <div className="flex flex-col gap-6">
+          {/* Post Details */}
+          <div className="border border-gray-200 rounded-xl p-5 bg-gray-50/50">
+            <h3 className="font-semibold text-sm text-gray-800 mb-4 border-b border-gray-200 pb-2">
+              Post Details
+            </h3>
+
+            {/* Dynamic Category Select */}
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleInputChange}
+              className="w-full p-2.5 text-sm border border-gray-200 rounded-lg mb-3 outline-none focus:border-[#295c5e] bg-white cursor-pointer"
+            >
+              <option value="" disabled>
+                Select a Category
+              </option>
+              {categories.map((cat, idx) => (
+                <option key={cat._id || idx} value={cat.name || cat}>
+                  {cat.name || cat}
+                </option>
+              ))}
+            </select>
+
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              placeholder="Short Description / Excerpt"
+              className="w-full p-2.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#295c5e] resize-none mb-1"
+              rows={3}
+            />
+          </div>
+
+          {/* SEO Settings */}
           <div className="border border-gray-200 rounded-xl p-5 bg-gray-50/50">
             <h3 className="font-semibold text-sm text-gray-800 mb-4 border-b border-gray-200 pb-2">
               SEO Settings
             </h3>
             <input
+              name="metaTitle"
+              value={formData.metaTitle}
+              onChange={handleInputChange}
               type="text"
               placeholder="Meta Title"
               className="w-full p-2.5 text-sm border border-gray-200 rounded-lg mb-3 outline-none focus:border-[#295c5e]"
             />
             <textarea
+              name="metaDescription"
+              value={formData.metaDescription}
+              onChange={handleInputChange}
               placeholder="Meta Description"
               className="w-full p-2.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#295c5e] resize-none mb-4"
-              rows={4}
+              rows={3}
             />
 
             {/* Keywords Section */}
@@ -193,9 +388,9 @@ const NewPost = () => {
           {/* Featured Image Section */}
           <div className="w-full">
             <h3 className="font-semibold text-sm text-gray-800 mb-2">
-              Featured Image
+              Featured Image <span className="text-red-500">*</span>
             </h3>
-            {image ? (
+            {image?.url ? (
               <div className="relative group rounded-xl overflow-hidden border border-gray-200 w-full shadow-sm">
                 <img
                   src={image.url}
@@ -223,12 +418,21 @@ const NewPost = () => {
             )}
           </div>
 
+          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-2 mt-auto">
-            <button className="flex-1 py-2.5 px-4 bg-white border border-gray-200 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
-              <Save size={16} /> Draft
+            <button
+              onClick={() => handleSubmit("draft")}
+              disabled={isLoading}
+              className="flex-1 py-2.5 px-4 bg-white border border-gray-200 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+            >
+              <Save size={16} /> {isLoading ? "Saving..." : "Draft"}
             </button>
-            <button className="flex-1 py-2.5 px-4 bg-[#295c5e] text-white text-sm font-semibold rounded-xl hover:bg-[#1f4547] shadow-md transition-all flex items-center justify-center gap-2">
-              <Send size={16} /> Publish
+            <button
+              onClick={() => handleSubmit("published")}
+              disabled={isLoading}
+              className="flex-1 py-2.5 px-4 bg-[#295c5e] text-white text-sm font-semibold rounded-xl hover:bg-[#1f4547] shadow-md disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+            >
+              <Send size={16} /> {isLoading ? "Publishing..." : "Publish"}
             </button>
           </div>
         </div>
@@ -259,7 +463,6 @@ const NewPost = () => {
           font-style: normal;
           color: #9ca3af;
         }
-        /* Custom Scrollbar for the editor */
         .ql-editor::-webkit-scrollbar {
           width: 6px;
         }

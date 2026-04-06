@@ -1,40 +1,41 @@
-import { Contact2, LayoutDashboard, PoundSterling } from "lucide-react";
+import {
+  LayoutDashboard,
+  FileText,
+  Layers,
+  Users,
+  MessageSquare,
+  Image as ImageIcon,
+} from "lucide-react";
 
 export const menuList = [
   {
-    name: "DashBoard",
+    name: "Dashboard",
     href: "/",
-    icon: <LayoutDashboard />,
-    size: 20,
+    icon: <LayoutDashboard size={20} />,
   },
   {
     name: "Posts",
     href: "/posts",
-    icon: <PoundSterling />,
-    size: 20,
+    icon: <FileText size={20} />,
   },
   {
     name: "Categories",
     href: "/categories",
-    icon: <LayoutDashboard />,
-    size: 20,
+    icon: <Layers size={20} />,
   },
   {
     name: "Subscribers",
     href: "/subscriber",
-    icon: <LayoutDashboard />,
-    size: 20,
+    icon: <Users size={20} />,
   },
   {
     name: "Messages",
     href: "/messages",
-    icon: <Contact2 />,
-    size: 20,
+    icon: <MessageSquare size={20} />,
   },
   {
-    name: "Medias",
+    name: "Media Library",
     href: "/media-library",
-    icon: <LayoutDashboard />,
-    size: 20,
+    icon: <ImageIcon size={20} />,
   },
 ];

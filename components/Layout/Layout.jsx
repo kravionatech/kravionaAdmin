@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, Navigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Search,
   Bell,
@@ -9,19 +9,30 @@ import {
   X,
   ChevronRight,
 } from "lucide-react";
-import { menuList } from "../../utils/menuList.jsx";
+import { menuList } from "../../utils/menuList.jsx"; // Adjust path if necessary
 
 const Layout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate(); // Used for the logout redirect
 
+  // Improved to keep menu active even on sub-routes (e.g., /posts/new)
   const getLinkClass = (path) => {
-    const isActive = location.pathname === path;
+    const isActive =
+      path === "/"
+        ? location.pathname === "/"
+        : location.pathname.startsWith(path);
+
     return `flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group ${
       isActive
         ? "bg-[#295c5e] text-white shadow-lg shadow-[#295c5e]/20"
         : "text-gray-500 hover:bg-gray-100 hover:text-[#295c5e]"
     }`;
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -31,6 +42,7 @@ const Layout = ({ children }) => {
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
           onClick={() => setIsSidebarOpen(false)}
+          aria-label="Close Sidebar"
         />
       )}
 
@@ -43,7 +55,7 @@ const Layout = ({ children }) => {
       `}
       >
         {/* Logo Section */}
-        <div className="h-20 flex items-center justify-between px-6">
+        <div className="h-20 flex items-center justify-between px-6 shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-[#295c5e] rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xl">K</span>
@@ -53,7 +65,7 @@ const Layout = ({ children }) => {
             </h1>
           </div>
           <button
-            className="lg:hidden text-gray-400 hover:text-gray-600"
+            className="lg:hidden text-gray-400 hover:text-gray-600 transition-colors"
             onClick={() => setIsSidebarOpen(false)}
           >
             <X size={20} />
@@ -65,24 +77,31 @@ const Layout = ({ children }) => {
           <p className="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">
             Main Menu
           </p>
-          {menuList.map((menu) => (
-            <Link
-              key={menu.href}
-              to={menu.href}
-              className={getLinkClass(menu.href)}
-              onClick={() => setIsSidebarOpen(false)}
-            >
-              <div className="flex items-center gap-3">
-                <span className="shrink-0">{menu.icon}</span>
-                <span className="font-semibold text-sm">{menu.name}</span>
-              </div>
-              {location.pathname === menu.href && <ChevronRight size={14} />}
-            </Link>
-          ))}
+          {menuList.map((menu) => {
+            const isActive =
+              menu.href === "/"
+                ? location.pathname === "/"
+                : location.pathname.startsWith(menu.href);
+
+            return (
+              <Link
+                key={menu.href}
+                to={menu.href}
+                className={getLinkClass(menu.href)}
+                onClick={() => setIsSidebarOpen(false)}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="shrink-0">{menu.icon}</span>
+                  <span className="font-semibold text-sm">{menu.name}</span>
+                </div>
+                {isActive && <ChevronRight size={14} />}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Bottom Section */}
-        <div className="p-4 border-t border-gray-100 space-y-1">
+        <div className="p-4 border-t border-gray-100 space-y-1 shrink-0">
           <Link
             to="/settings"
             className={getLinkClass("/settings")}
@@ -95,10 +114,7 @@ const Layout = ({ children }) => {
           </Link>
 
           <button
-            onClick={() => {
-              localStorage.removeItem("token");
-              <Navigate to="/login" replace />;
-            }}
+            onClick={handleLogout}
             className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-rose-500 hover:bg-rose-50 rounded-xl transition-all duration-200"
           >
             <LogOut size={20} />
@@ -110,11 +126,11 @@ const Layout = ({ children }) => {
       {/* ================= MAIN CONTENT AREA ================= */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header */}
-        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30">
+        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shrink-0">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-600"
+              className="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"
             >
               <Menu size={24} />
             </button>
