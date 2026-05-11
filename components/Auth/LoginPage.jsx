@@ -35,7 +35,7 @@ const LoginPage = () => {
       const res = await fetch(`${backendApi}/auth/resend-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: loginId }),
+        body: JSON.stringify({ email: loginId }),
       });
 
       const data = await res.json();
@@ -45,7 +45,7 @@ const LoginPage = () => {
       } else {
         setError(data.message || "Failed to send OTP. Please try again.");
       }
-    } catch (err) {
+    } catch {
       setError("Network error. Please check your connection.");
     } finally {
       setIsLoading(false);
@@ -64,7 +64,7 @@ const LoginPage = () => {
       const res = await fetch(`${backendApi}/auth/login-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: loginId, otp }),
+        body: JSON.stringify({ email: loginId, otp }),
       });
 
       const data = await res.json();
@@ -72,14 +72,15 @@ const LoginPage = () => {
       if (res.ok && data.success) {
         console.log(data);
 
-        localStorage.setItem("token", data.token);
+        localStorage.setItem("token", data.accessToken);
+        localStorage.setItem("user", JSON.stringify(data.user));
 
         navigate("/");
       } else {
         setError(data.message || "Invalid OTP. Please try again.");
         setOtp("");
       }
-    } catch (err) {
+    } catch {
       setError("Network error. Please check your connection.");
     } finally {
       setIsLoading(false);
@@ -121,7 +122,7 @@ const LoginPage = () => {
                   htmlFor="loginId"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Email, Phone, or Username
+                  Email
                 </label>
                 <div className="mt-2 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -134,7 +135,7 @@ const LoginPage = () => {
                     value={loginId}
                     onChange={(e) => setLoginId(e.target.value)}
                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
-                    placeholder="Enter email, phone number or username"
+                    placeholder="Enter email"
                   />
                 </div>
               </div>

@@ -62,7 +62,7 @@ const Subscriber = () => {
     try {
       setIsActionLoading(true);
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_API}/subscribers/${id}`,
+        `${import.meta.env.VITE_BACKEND_API}/subscriber/delete/${id}`,
         {
           method: "DELETE",
           headers: {

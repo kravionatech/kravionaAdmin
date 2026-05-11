@@ -47,6 +47,33 @@ const Categories = () => {
     fetchCategories();
   }, [openNewCategoryModel]);
 
+  const handleDeleteCategory = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this category?")) return;
+    
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_API}/category/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        toast.success(data.message || "Category deleted successfully");
+        fetchCategories(); // Refresh the list
+      } else {
+        toast.error(data.message || "Failed to delete category");
+      }
+    } catch (error) {
+      toast.error("Network error. Could not delete category.");
+    }
+  };
+
   const getStatusStyles = (status) => {
     const s = status?.toLowerCase();
     if (s === "published")
@@ -202,6 +229,7 @@ const Categories = () => {
                           <Edit size={16} />
                         </button>
                         <button
+                          onClick={() => handleDeleteCategory(category._id)}
                           className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
                           title="Delete"
                         >

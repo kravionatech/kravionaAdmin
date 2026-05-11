@@ -146,12 +146,15 @@ const NewPost = ({ newPostModel, setNewPostModel }) => {
         return;
       }
 
-      // 2. Prepare Payload (Removed expert)
+      const selectedCategory = categories.find(c => c._id === formData.category || c.name === formData.category);
+
       const payload = {
         title: formData.title,
+        slug: formData.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
         content: content,
-        description: formData.description,
-        category: formData.category,
+        excerpt: formData.description,
+        categoryID: selectedCategory ? selectedCategory._id : null,
+        category: selectedCategory ? { name: selectedCategory.name, slug: selectedCategory.slug } : null,
         status: status, // "published" or "draft"
         thumbnail: image.url,
         metaTitle: formData.metaTitle,
@@ -297,7 +300,7 @@ const NewPost = ({ newPostModel, setNewPostModel }) => {
                 Select a Category
               </option>
               {categories.map((cat, idx) => (
-                <option key={cat._id || idx} value={cat.name || cat}>
+                <option key={cat._id || idx} value={cat._id || cat.name || cat}>
                   {cat.name || cat}
                 </option>
               ))}

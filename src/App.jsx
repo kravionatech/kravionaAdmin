@@ -17,6 +17,8 @@ import Subscriber from "../components/subscriber/Subscriber";
 import Settings from "../components/Setting/Setting";
 import MediaLibrary from "../components/media/MediaLibrary";
 import PostPage from "../components/Post/PostPage";
+import { DependencyError } from "../config/config";
+
 
 // ==========================================
 // 1. Protected Route Wrapper Component
@@ -59,6 +61,7 @@ const App = () => {
           <Route path="/media-library" element={<MediaLibrary />} />
           <Route path="/subscriber" element={<Subscriber />} />
           <Route path="/posts" element={<PostPage />} />
+          <Route path="/missing"element={<DependencyError/>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

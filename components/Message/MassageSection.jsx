@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Eye,
   Trash2,
@@ -28,7 +28,7 @@ const Messages = () => {
   const backendApi = import.meta.env.VITE_BACKEND_API;
 
   // 1. Fetch Messages (Handles both Pagination and Search)
-  const fetchMessages = async (page = 1, search = "") => {
+  const fetchMessages = useCallback(async (page = 1, search = "") => {
     setLoading(true);
     try {
       // Build the URL with page and search query parameters
@@ -57,12 +57,12 @@ const Messages = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [backendApi]);
 
   // Fetch when page changes or search is submitted
   useEffect(() => {
     fetchMessages(currentPage, searchQuery);
-  }, [currentPage]);
+  }, [currentPage, fetchMessages, searchQuery]);
 
   // Handle Search Input (Pressing Enter)
   const handleSearch = (e) => {
@@ -94,18 +94,19 @@ const Messages = () => {
     try {
       // Update the status on the backend
       const response = await fetch(`${backendApi}/admin/messages/${msg._id}`, {
-        method: "GET",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
+        body: JSON.stringify({ status: "read" }),
       });
 
       if (response.ok) {
         // Instantly update the UI badge from "New" to "Read"
         setMessages((prevMessages) =>
           prevMessages.map((m) =>
-            m._id === msg._id ? { ...m, isRead: true } : m,
+            m._id === msg._id ? { ...m, isRead: true, status: "read" } : m,
           ),
         );
       }
@@ -231,21 +232,21 @@ const Messages = () => {
                   <tr
                     key={msg._id}
                     className={`border-b border-gray-100 transition-colors ${
-                      !msg.isRead
+                      (!msg.isRead && msg.status !== 'read')
                         ? "bg-blue-50/40 hover:bg-blue-50/70"
                         : "hover:bg-gray-50"
                     }`}
                   >
                     <td className="p-4">
                       <p
-                        className={`text-gray-900 ${!msg.isRead ? "font-bold" : "font-semibold"}`}
+                        className={`text-gray-900 ${(!msg.isRead && msg.status !== 'read') ? "font-bold" : "font-semibold"}`}
                       >
                         {msg.fullname}
                       </p>
                       <p className="text-xs text-gray-500">{msg.email}</p>
                     </td>
                     <td
-                      className={`p-4 truncate max-w-[200px] ${!msg.isRead ? "font-semibold text-gray-900" : "font-medium text-gray-700"}`}
+                      className={`p-4 truncate max-w-[200px] ${(!msg.isRead && msg.status !== 'read') ? "font-semibold text-gray-900" : "font-medium text-gray-700"}`}
                     >
                       {msg.subject}
                     </td>
@@ -255,12 +256,12 @@ const Messages = () => {
                     <td className="p-4">
                       <span
                         className={`px-3 py-1 text-[10px] uppercase tracking-wider font-bold rounded-full ${
-                          !msg.isRead
+                          (!msg.isRead && msg.status !== 'read')
                             ? "bg-blue-100 text-blue-700"
                             : "bg-gray-100 text-gray-500"
                         }`}
                       >
-                        {!msg.isRead ? "New" : "Read"}
+                        {(!msg.isRead && msg.status !== 'read') ? "New" : "Read"}
                       </span>
                     </td>
                     <td className="p-4 flex justify-end gap-2">

@@ -46,7 +46,7 @@ const MediaLibrary = () => {
       if (data.success) {
         setFiles(data.files || []);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch media files");
     } finally {
       setIsLoading(false);
@@ -98,7 +98,7 @@ const MediaLibrary = () => {
       } else {
         toast.error(data.message || "Upload failed");
       }
-    } catch (error) {
+    } catch {
       toast.error("Network error during upload");
     } finally {
       // Hide the floating progress bar
@@ -137,7 +137,7 @@ const MediaLibrary = () => {
       } else {
         toast.error(data.message);
       }
-    } catch (error) {
+    } catch {
       toast.error("Update failed");
     }
   };
@@ -160,7 +160,7 @@ const MediaLibrary = () => {
         toast.success("Deleted successfully");
         setFiles((prev) => prev.filter((f) => f._id !== id));
       }
-    } catch (error) {
+    } catch {
       toast.error("Delete failed");
     }
   };

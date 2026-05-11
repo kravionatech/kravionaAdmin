@@ -45,8 +45,8 @@ const PostPage = () => {
         );
       }
 
-      // Your JSON returns the array inside the "data" property
-      setPosts(result.data || []);
+      // Your JSON returns the array inside the "posts" property
+      setPosts(result.posts || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -61,8 +61,7 @@ const PostPage = () => {
     }
   }, [newPostModel]);
 
-  // Handle Delete Post (Placeholder - update with your actual delete route)
-  const handleDelete = async (postId) => {
+  const handleDelete = async (postSlug) => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
 
     try {
@@ -70,7 +69,7 @@ const PostPage = () => {
       const apiUrl =
         import.meta.env.VITE_BACKEND_API || "https://api.kraviona.com/api";
 
-      const response = await fetch(`${apiUrl}/post/${postId}`, {
+      const response = await fetch(`${apiUrl}/post/${postSlug}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -80,7 +79,7 @@ const PostPage = () => {
       if (!response.ok) throw new Error("Failed to delete post");
 
       // Remove from UI immediately
-      setPosts(posts.filter((post) => post._id !== postId));
+      setPosts(posts.filter((post) => post.slug !== postSlug));
     } catch (err) {
       alert(err.message);
     }
@@ -248,7 +247,7 @@ const PostPage = () => {
                             <Edit size={16} />
                           </button>
                           <button
-                            onClick={() => handleDelete(post._id)}
+                            onClick={() => handleDelete(post.slug)}
                             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
                             title="Delete Post"
                           >

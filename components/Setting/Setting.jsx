@@ -38,7 +38,7 @@ const Settings = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       toast.success("Settings saved successfully!");
-    } catch (error) {
+    } catch {
       toast.error("Failed to save settings.");
     } finally {
       setIsSaving(false);

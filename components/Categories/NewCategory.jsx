@@ -1,15 +1,13 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Camera, Search, X, Image as ImageIcon } from "lucide-react";
 import ShowAllImage from "../image/ShowAllImage";
 import { toast } from "react-toastify";
 
-const NewCategory = ({ openNewCategoryModel, setOpenNewCategoryModel }) => {
+const NewCategory = ({ setOpenNewCategoryModel }) => {
   const [imageModel, setImageModel] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [categoryName, setCategoryName] = useState();
   const [description, setDescription] = useState();
-  const [metaTitle, setMetaTitle] = useState();
-  const [keywords, setKeywords] = useState();
   const [message, setMessage] = useState("");
 
   const chooseImage = (url) => {
@@ -33,6 +31,7 @@ const NewCategory = ({ openNewCategoryModel, setOpenNewCategoryModel }) => {
           },
           body: JSON.stringify({
             name: categoryName,
+            slug: categoryName.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
             image: imageUrl?.url,
             description: description,
           }),
@@ -44,8 +43,6 @@ const NewCategory = ({ openNewCategoryModel, setOpenNewCategoryModel }) => {
         setCategoryName("");
         setDescription("");
         setImageUrl("");
-        setMetaTitle("");
-        setKeywords("");
         toast.success(data.message);
         setOpenNewCategoryModel(false);
       } else {
