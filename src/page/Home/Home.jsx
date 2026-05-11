@@ -36,11 +36,11 @@ const Home = () => {
         ]);
 
         setStats({
-          posts: posts.total || 0,
-          categories: categories.total || categories.categories?.length || 0,
+          posts: posts.pagination?.total || posts.total || 0,
+          categories: categories.pagination?.totalItems || categories.total || categories.categories?.length || 0,
           messages: messages.pagination?.total || messages.total || 0,
           subscribers: subscribers.pagination?.total || subscribers.total || 0,
-          files: files.total || files.files?.length || 0
+          files: files.pagination?.total || files.total || files.files?.length || 0
         });
       } catch (error) {
         console.error("Failed to fetch dashboard stats", error);

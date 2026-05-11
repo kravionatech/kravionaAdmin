@@ -16,7 +16,7 @@ const NewPost = ({ newPostModel, setNewPostModel }) => {
   const editorRef = useRef(null);
   const quillRef = useRef(null);
 
-  // Form States (Removed expert)
+  // Form States
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -76,7 +76,6 @@ const NewPost = ({ newPostModel, setNewPostModel }) => {
         const data = await response.json();
 
         if (response.ok) {
-          // Adapt based on your actual API response structure (e.g., data.categories, data.data, or just data)
           setCategories(data.categories || data.data || data || []);
         }
       } catch (err) {
@@ -126,6 +125,8 @@ const NewPost = ({ newPostModel, setNewPostModel }) => {
     if (!content || content === "<p><br></p>")
       return "Post content cannot be empty.";
     if (!formData.category) return "Category is required.";
+    // Added validation for description as it's required by the backend
+    if (!formData.description.trim()) return "Description/Excerpt is required."; 
     if (!image?.url) return "A featured image (thumbnail) is required.";
     return null;
   };
@@ -146,15 +147,22 @@ const NewPost = ({ newPostModel, setNewPostModel }) => {
         return;
       }
 
-      const selectedCategory = categories.find(c => c._id === formData.category || c.name === formData.category);
+      const selectedCategory = categories.find(
+        (c) => c._id === formData.category || c.name === formData.category
+      );
 
+      // FIXED PAYLOAD: Match backend requirements perfectly
       const payload = {
         title: formData.title,
-        slug: formData.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
+        slug: formData.title
+          .toLowerCase()
+          .replace(/ /g, "-")
+          .replace(/[^\w-]+/g, ""),
         content: content,
-        excerpt: formData.description,
-        categoryID: selectedCategory ? selectedCategory._id : null,
-        category: selectedCategory ? { name: selectedCategory.name, slug: selectedCategory.slug } : null,
+        description: formData.description, // Required by backend
+        excerpt: formData.description,     // Fallback for excerpt
+        // Backend expects 'category' to be a string (the name) for CategoryModel.findOne
+        category: selectedCategory ? selectedCategory.name : formData.category,
         status: status, // "published" or "draft"
         thumbnail: image.url,
         metaTitle: formData.metaTitle,
@@ -184,7 +192,7 @@ const NewPost = ({ newPostModel, setNewPostModel }) => {
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Failed to create post. Please try again.",
+          data.message || "Failed to create post. Please try again."
         );
       }
 
@@ -310,7 +318,7 @@ const NewPost = ({ newPostModel, setNewPostModel }) => {
               name="description"
               value={formData.description}
               onChange={handleInputChange}
-              placeholder="Short Description / Excerpt"
+              placeholder="Short Description / Excerpt *"
               className="w-full p-2.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#295c5e] resize-none mb-1"
               rows={3}
             />

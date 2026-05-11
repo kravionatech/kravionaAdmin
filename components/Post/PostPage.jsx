@@ -45,8 +45,10 @@ const PostPage = () => {
         );
       }
 
-      // Your JSON returns the array inside the "posts" property
-      setPosts(result.posts || []);
+      // Your JSON returns the array inside the "data" property
+      if (result.success) {
+        setPosts(result.data || []);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -189,9 +191,9 @@ const PostPage = () => {
                       <td className="py-3 px-6">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden shrink-0">
-                            {post.thumbnail ? (
+                            {post.featuredImage?.large?.url || post.featuredImage?.medium?.url || post.featuredImage?.small?.url ? (
                               <img
-                                src={post.thumbnail}
+                                src={post.featuredImage?.large?.url || post.featuredImage?.medium?.url || post.featuredImage?.small?.url}
                                 alt={post.title}
                                 className="w-full h-full object-cover"
                               />
@@ -210,9 +212,9 @@ const PostPage = () => {
                             </p>
                             <p
                               className="text-xs text-gray-500 line-clamp-1 max-w-[300px] mt-0.5"
-                              title={post.description}
+                              title={post.excerpt}
                             >
-                              {post.description || "No description"}
+                              {post.excerpt || "No excerpt"}
                             </p>
                           </div>
                         </div>

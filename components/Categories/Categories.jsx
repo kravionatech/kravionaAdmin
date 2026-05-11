@@ -69,7 +69,7 @@ const Categories = () => {
       } else {
         toast.error(data.message || "Failed to delete category");
       }
-    } catch (error) {
+    } catch {
       toast.error("Network error. Could not delete category.");
     }
   };

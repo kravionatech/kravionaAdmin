@@ -35,7 +35,7 @@ const LoginPage = () => {
       const res = await fetch(`${backendApi}/auth/resend-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: loginId }),
+        body: JSON.stringify({ identifier: loginId }),
       });
 
       const data = await res.json();
@@ -64,7 +64,7 @@ const LoginPage = () => {
       const res = await fetch(`${backendApi}/auth/login-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: loginId, otp }),
+        body: JSON.stringify({ identifier: loginId, otp }),
       });
 
       const data = await res.json();
@@ -72,8 +72,10 @@ const LoginPage = () => {
       if (res.ok && data.success) {
         console.log(data);
 
-        localStorage.setItem("token", data.accessToken);
-        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("token", data.token?.accessToken || data.token || "");
+        // Backend currently doesn't return user in login response, just token.
+        // If it did, we would use data.user. For now, we omit it or set it empty.
+        localStorage.setItem("user", JSON.stringify(data.user || {}));
 
         navigate("/");
       } else {
@@ -122,7 +124,7 @@ const LoginPage = () => {
                   htmlFor="loginId"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Email
+                  Email, Phone, or Username
                 </label>
                 <div className="mt-2 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -135,7 +137,7 @@ const LoginPage = () => {
                     value={loginId}
                     onChange={(e) => setLoginId(e.target.value)}
                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
-                    placeholder="Enter email"
+                    placeholder="Enter email, phone number or username"
                   />
                 </div>
               </div>

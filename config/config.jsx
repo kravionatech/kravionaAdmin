@@ -5,8 +5,7 @@ import { Navigate } from "react-router-dom"
 /* eslint-disable react-refresh/only-export-components */
 export const config ={
 
-    VITE_BACKEND_API :import.meta.env.VITE_BACKEND_API,
-    GD: import.meta.env.GD
+    VITE_BACKEND_API :import.meta.env.VITE_BACKEND_API
 
 } 
 
