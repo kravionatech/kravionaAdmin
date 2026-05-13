@@ -5,6 +5,12 @@ import {
   Users,
   MessageSquare,
   Image as ImageIcon,
+  Briefcase,
+  FolderDot,
+  Star,
+  UsersRound,
+  Mail,
+  ShieldAlert,
 } from "lucide-react";
 
 export const menuList = [
@@ -24,6 +30,26 @@ export const menuList = [
     icon: <Layers size={20} />,
   },
   {
+    name: "Services",
+    href: "/services",
+    icon: <Briefcase size={20} />,
+  },
+  {
+    name: "Projects",
+    href: "/projects",
+    icon: <FolderDot size={20} />,
+  },
+  {
+    name: "Testimonials",
+    href: "/testimonials",
+    icon: <Star size={20} />,
+  },
+  {
+    name: "Team",
+    href: "/team",
+    icon: <UsersRound size={20} />,
+  },
+  {
     name: "Subscribers",
     href: "/subscriber",
     icon: <Users size={20} />,
@@ -37,5 +63,15 @@ export const menuList = [
     name: "Media Library",
     href: "/media-library",
     icon: <ImageIcon size={20} />,
+  },
+  {
+    name: "Campaigns",
+    href: "/campaigns",
+    icon: <Mail size={20} />,
+  },
+  {
+    name: "Audit Logs",
+    href: "/audit-logs",
+    icon: <ShieldAlert size={20} />,
   },
 ];
