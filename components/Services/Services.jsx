@@ -1,11 +1,19 @@
 import { Plus, Search, Edit, Trash2, Loader2, Image as ImageIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import ServiceModal from "./ServiceModal";
 
 const Services = () => {
   const [services, setServices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [serviceToEdit, setServiceToEdit] = useState(null);
+
+  const handleOpenModal = (service = null) => {
+    setServiceToEdit(service);
+    setIsModalOpen(true);
+  };
 
   const fetchServices = async () => {
     try {
@@ -90,7 +98,7 @@ const Services = () => {
               <Search className="absolute left-3.5 top-3 h-4 w-4 text-gray-400" />
             </div>
 
-            <button className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#295c5e] hover:bg-[#1f4547] transition-colors py-2.5 px-6 rounded-xl text-white font-medium shadow-sm shadow-[#295c5e]/20">
+            <button onClick={() => handleOpenModal()} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#295c5e] hover:bg-[#1f4547] transition-colors py-2.5 px-6 rounded-xl text-white font-medium shadow-sm shadow-[#295c5e]/20">
               <Plus size={18} strokeWidth={2.5} />
               <span>Add Service</span>
             </button>
@@ -155,7 +163,7 @@ const Services = () => {
                     </td>
                     <td className="p-5">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit">
+                        <button onClick={() => handleOpenModal(service)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit">
                           <Edit size={16} />
                         </button>
                         <button onClick={() => handleDeleteService(service._id)} className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all" title="Delete">
@@ -170,6 +178,12 @@ const Services = () => {
           </table>
         </div>
       </div>
+      <ServiceModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        fetchServices={fetchServices}
+        serviceToEdit={serviceToEdit}
+      />
     </div>
   );
 };

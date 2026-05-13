@@ -1,11 +1,19 @@
 import { Plus, Search, Edit, Trash2, Loader2, Mail, Send } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import CampaignModal from "./CampaignModal";
 
 const Campaigns = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [campaignToEdit, setCampaignToEdit] = useState(null);
+
+  const handleOpenModal = (campaign = null) => {
+    setCampaignToEdit(campaign);
+    setIsModalOpen(true);
+  };
 
   const fetchCampaigns = async () => {
     try {
@@ -117,7 +125,7 @@ const Campaigns = () => {
               <Search className="absolute left-3.5 top-3 h-4 w-4 text-gray-400" />
             </div>
 
-            <button className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#295c5e] hover:bg-[#1f4547] transition-colors py-2.5 px-6 rounded-xl text-white font-medium shadow-sm shadow-[#295c5e]/20">
+            <button onClick={() => handleOpenModal()} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#295c5e] hover:bg-[#1f4547] transition-colors py-2.5 px-6 rounded-xl text-white font-medium shadow-sm shadow-[#295c5e]/20">
               <Plus size={18} strokeWidth={2.5} />
               <span>Create Campaign</span>
             </button>
@@ -193,7 +201,7 @@ const Campaigns = () => {
                             <Send size={16} />
                           </button>
                         )}
-                        <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit">
+                        <button onClick={() => handleOpenModal(campaign)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit">
                           <Edit size={16} />
                         </button>
                         <button onClick={() => handleDeleteCampaign(campaign._id)} className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all" title="Delete">
@@ -208,6 +216,12 @@ const Campaigns = () => {
           </table>
         </div>
       </div>
+      <CampaignModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        fetchCampaigns={fetchCampaigns}
+        campaignToEdit={campaignToEdit}
+      />
     </div>
   );
 };
