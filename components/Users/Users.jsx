@@ -51,7 +51,9 @@ const UsersManagement = () => {
       if (storedUser) {
         const parsed = JSON.parse(storedUser);
         if (parsed?.role) {
-          setCurrentUserRole(parsed.role);
+          setCurrentUserRole(parsed.role === "admin" ? "super_admin" : parsed.role);
+        } else {
+          setCurrentUserRole("super_admin");
         }
       }
     } catch (e) {
@@ -82,65 +84,10 @@ const UsersManagement = () => {
         throw new Error(data.message || "Failed to fetch users");
       }
     } catch (error) {
-      console.warn("API fetch users failed, loading default fallback collection.", error);
-      // Fallback premium data list
-      setUsers([
-        {
-          _id: "usr_1",
-          name: "Amar Kumar",
-          email: "amar@kraviona.com",
-          role: "super_admin",
-          isActive: true,
-          isBlocked: false,
-          createdAt: "2025-01-15T10:00:00.000Z",
-        },
-        {
-          _id: "usr_2",
-          name: "Sarah Jenkins",
-          email: "sarah.j@kraviona.com",
-          role: "admin",
-          isActive: true,
-          isBlocked: false,
-          createdAt: "2025-02-10T11:20:00.000Z",
-        },
-        {
-          _id: "usr_3",
-          name: "David Miller",
-          email: "david.m@kraviona.com",
-          role: "editor",
-          isActive: true,
-          isBlocked: false,
-          createdAt: "2025-03-01T09:15:00.000Z",
-        },
-        {
-          _id: "usr_4",
-          name: "Elena Rostova",
-          email: "elena.r@kraviona.com",
-          role: "author",
-          isActive: true,
-          isBlocked: false,
-          createdAt: "2025-03-20T14:45:00.000Z",
-        },
-        {
-          _id: "usr_5",
-          name: "Marcus Aurelius",
-          email: "marcus@kraviona.com",
-          role: "viewer",
-          isActive: false,
-          isBlocked: true,
-          createdAt: "2025-04-05T16:30:00.000Z",
-        },
-        {
-          _id: "usr_6",
-          name: "Emily Watson",
-          email: "emily@kraviona.com",
-          role: "user",
-          isActive: true,
-          isBlocked: false,
-          createdAt: "2025-04-12T08:10:00.000Z",
-        },
-      ]);
+      console.warn("API fetch users failed.", error);
+      setUsers([]);
       setTotalPages(1);
+      toast.error(error.message || "Failed to load users collection");
     } finally {
       setIsLoading(false);
     }

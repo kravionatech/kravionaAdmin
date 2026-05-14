@@ -13,6 +13,7 @@ import NewPost from "./NewPost";
 
 const PostPage = () => {
   const [newPostModel, setNewPostModel] = useState(false);
+  const [postToEdit, setPostToEdit] = useState(null);
 
   // Table States
   const [posts, setPosts] = useState([]);
@@ -125,7 +126,10 @@ const PostPage = () => {
           </div>
 
           <button
-            onClick={() => setNewPostModel(true)}
+            onClick={() => {
+              setPostToEdit(null);
+              setNewPostModel(true);
+            }}
             className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#295c5e] hover:bg-[#1f4547] transition-colors py-2.5 px-6 rounded-xl text-white font-medium shadow-sm shadow-[#295c5e]/20"
           >
             <Plus size={18} strokeWidth={2.5} />
@@ -243,7 +247,11 @@ const PostPage = () => {
                       <td className="py-3 px-6 text-right">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
-                            className="p-1.5 text-gray-400 hover:text-[#295c5e] hover:bg-[#295c5e]/10 rounded-md transition-colors"
+                            onClick={() => {
+                              setPostToEdit(post);
+                              setNewPostModel(true);
+                            }}
+                            className="p-1.5 text-gray-400 hover:text-[#295c5e] hover:bg-[#295c5e]/10 rounded-md transition-colors cursor-pointer"
                             title="Edit Post"
                           >
                             <Edit size={16} />
@@ -275,6 +283,8 @@ const PostPage = () => {
           <NewPost
             newPostModel={newPostModel}
             setNewPostModel={setNewPostModel}
+            postToEdit={postToEdit}
+            fetchPosts={fetchPosts}
           />
         </div>
       )}

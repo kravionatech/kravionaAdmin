@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import ShowAllImage from "../image/ShowAllImage";
 
-const NewPost = ({ newPostModel, setNewPostModel }) => {
+const NewPost = ({ newPostModel, setNewPostModel, postToEdit, fetchPosts }) => {
   const editorRef = useRef(null);
   const quillRef = useRef(null);
 
@@ -63,8 +63,34 @@ const NewPost = ({ newPostModel, setNewPostModel }) => {
           ],
         },
       });
+      if (postToEdit?.content) {
+        quillRef.current.root.innerHTML = postToEdit.content;
+      }
     }
-  }, []);
+  }, [postToEdit]);
+
+  // Populate data when editing an existing post
+  useEffect(() => {
+    if (postToEdit) {
+      setFormData({
+        title: postToEdit.title || "",
+        description: postToEdit.description || postToEdit.excerpt || "",
+        category: postToEdit.category?._id || postToEdit.category?.name || postToEdit.category || "",
+        metaTitle: postToEdit.metaTitle || "",
+        metaDescription: postToEdit.metaDescription || "",
+      });
+      if (postToEdit.keywords && Array.isArray(postToEdit.keywords)) {
+        setKeywords(postToEdit.keywords);
+      }
+      const imgUrl = postToEdit.featuredImage?.large?.url || postToEdit.featuredImage?.medium?.url || postToEdit.featuredImage?.small?.url || postToEdit.thumbnail;
+      if (imgUrl) {
+        setImage({ url: imgUrl });
+      }
+      if (quillRef.current && postToEdit.content) {
+        quillRef.current.root.innerHTML = postToEdit.content;
+      }
+    }
+  }, [postToEdit]);
 
   // Fetch Categories
   useEffect(() => {
@@ -179,8 +205,13 @@ const NewPost = ({ newPostModel, setNewPostModel }) => {
       // 4. API Request
       const apiUrl =
         import.meta.env.VITE_BACKEND_API || "https://api.kraviona.com/api";
-      const response = await fetch(`${apiUrl}/post/create`, {
-        method: "POST",
+      const url = postToEdit
+        ? `${apiUrl}/post/${postToEdit.slug || postToEdit._id}`
+        : `${apiUrl}/post/create`;
+      const method = postToEdit ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -192,7 +223,7 @@ const NewPost = ({ newPostModel, setNewPostModel }) => {
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Failed to create post. Please try again."
+          data.message || `Failed to ${postToEdit ? "update" : "create"} post. Please try again.`
         );
       }
 
@@ -216,6 +247,7 @@ const NewPost = ({ newPostModel, setNewPostModel }) => {
       // Close modal after 1.5 seconds so user can read the success message
       setTimeout(() => {
         setSuccess(null);
+        if (fetchPosts) fetchPosts();
         if (setNewPostModel) setNewPostModel(false);
       }, 1500);
     } catch (err) {
@@ -231,7 +263,7 @@ const NewPost = ({ newPostModel, setNewPostModel }) => {
       <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4 sticky top-0 bg-white z-10">
         <div>
           <h2 className="text-2xl font-semibold text-gray-800 tracking-tight">
-            New Post
+            {postToEdit ? "Edit Post" : "New Post"}
           </h2>
           <p className="text-sm text-gray-500 mt-1">
             Write original content for your blog
@@ -434,16 +466,16 @@ const NewPost = ({ newPostModel, setNewPostModel }) => {
             <button
               onClick={() => handleSubmit("draft")}
               disabled={isLoading}
-              className="flex-1 py-2.5 px-4 bg-white border border-gray-200 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 px-4 bg-white border border-gray-200 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 disabled:opacity-50 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Save size={16} /> {isLoading ? "Saving..." : "Draft"}
+              <Save size={16} /> {isLoading ? "Saving..." : postToEdit ? "Update Draft" : "Draft"}
             </button>
             <button
               onClick={() => handleSubmit("published")}
               disabled={isLoading}
-              className="flex-1 py-2.5 px-4 bg-[#295c5e] text-white text-sm font-semibold rounded-xl hover:bg-[#1f4547] shadow-md disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 px-4 bg-[#295c5e] text-white text-sm font-semibold rounded-xl hover:bg-[#1f4547] shadow-md disabled:opacity-50 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Send size={16} /> {isLoading ? "Publishing..." : "Publish"}
+              <Send size={16} /> {isLoading ? "Publishing..." : postToEdit ? "Update Post" : "Publish"}
             </button>
           </div>
         </div>

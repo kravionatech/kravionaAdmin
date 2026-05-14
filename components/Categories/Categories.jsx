@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 
 const Categories = () => {
   const [openNewCategoryModel, setOpenNewCategoryModel] = useState(false);
+  const [categoryToEdit, setCategoryToEdit] = useState(null);
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -113,7 +114,10 @@ const Categories = () => {
             </div>
 
             <button
-              onClick={() => setOpenNewCategoryModel(true)}
+              onClick={() => {
+                setCategoryToEdit(null);
+                setOpenNewCategoryModel(true);
+              }}
               className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#295c5e] hover:bg-[#1f4547] transition-colors py-2.5 px-6 rounded-xl text-white font-medium shadow-sm shadow-[#295c5e]/20"
             >
               <Plus size={18} strokeWidth={2.5} />
@@ -223,6 +227,10 @@ const Categories = () => {
                     <td className="p-5">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
+                          onClick={() => {
+                            setCategoryToEdit(category);
+                            setOpenNewCategoryModel(true);
+                          }}
                           className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                           title="Edit"
                         >
@@ -250,6 +258,8 @@ const Categories = () => {
           <NewCategory
             openNewCategoryModel={openNewCategoryModel}
             setOpenNewCategoryModel={setOpenNewCategoryModel}
+            categoryToEdit={categoryToEdit}
+            fetchCategories={fetchCategories}
           />
         </div>
       )}

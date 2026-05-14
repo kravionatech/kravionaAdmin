@@ -37,44 +37,10 @@ const Notifications = () => {
       } else {
         throw new Error(data.message || "Failed to load notifications");
       }
-    } catch {
-      // Premium interactive simulated fallbacks for complete application demonstration
-      const fallbackData = [
-        {
-          _id: "notif_1",
-          type: "new_message",
-          title: "New Message from Alice Waters",
-          message: "Enquiring about enterprise software development timelines.",
-          isRead: false,
-          createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-        },
-        {
-          _id: "notif_2",
-          type: "new_subscriber",
-          title: "New Newsletter Subscriber",
-          message: "contact@anandsindhu.com joined the global mailing list.",
-          isRead: false,
-          createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-        },
-        {
-          _id: "notif_3",
-          type: "system_alert",
-          title: "High Memory Utilization Alert",
-          message: "Server node-alpha reached 82% memory threshold during scheduled backup.",
-          isRead: true,
-          createdAt: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-        },
-        {
-          _id: "notif_4",
-          type: "info",
-          title: "Database Automated Backup Complete",
-          message: "MongoDB snapshot securely exported to Cloud Storage cluster.",
-          isRead: true,
-          createdAt: new Date(Date.now() - 1000 * 60 * 300).toISOString(),
-        },
-      ];
-      setNotifications(fallbackData);
-      setUnreadCount(fallbackData.filter((n) => !n.isRead).length);
+    } catch (err) {
+      setNotifications([]);
+      setUnreadCount(0);
+      toast.error(err.message || "Failed to load notifications");
     } finally {
       setIsLoading(false);
     }

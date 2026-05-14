@@ -1,14 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Camera, Search, X, Image as ImageIcon } from "lucide-react";
 import ShowAllImage from "../image/ShowAllImage";
 import { toast } from "react-toastify";
 
-const NewCategory = ({ setOpenNewCategoryModel }) => {
+const NewCategory = ({ setOpenNewCategoryModel, categoryToEdit, fetchCategories }) => {
   const [imageModel, setImageModel] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
-  const [categoryName, setCategoryName] = useState();
-  const [description, setDescription] = useState();
+  const [categoryName, setCategoryName] = useState("");
+  const [description, setDescription] = useState("");
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (categoryToEdit) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCategoryName(categoryToEdit.name || "");
+      setDescription(categoryToEdit.description || "");
+      if (categoryToEdit.image) {
+        setImageUrl({ url: categoryToEdit.image });
+      }
+    }
+  }, [categoryToEdit]);
 
   const chooseImage = (url) => {
     setImageUrl(url);
@@ -21,29 +32,32 @@ const NewCategory = ({ setOpenNewCategoryModel }) => {
     if (!imageUrl?.url) setMessage("Image is required");
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_API}/category/new`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            name: categoryName,
-            slug: categoryName.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
-            image: imageUrl?.url,
-            description: description,
-          }),
+      const url = categoryToEdit
+        ? `${import.meta.env.VITE_BACKEND_API}/category/${categoryToEdit._id}`
+        : `${import.meta.env.VITE_BACKEND_API}/category/new`;
+      const method = categoryToEdit ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      );
+        body: JSON.stringify({
+          name: categoryName,
+          slug: categoryName.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
+          image: imageUrl?.url || imageUrl,
+          description: description,
+        }),
+      });
       const data = await response.json();
-      if (data.success) {
-        setMessage(data.message);
+      if (data.success || response.ok) {
+        setMessage(data.message || "Success");
         setCategoryName("");
         setDescription("");
         setImageUrl("");
-        toast.success(data.message);
+        toast.success(data.message || `Category ${categoryToEdit ? "updated" : "created"} successfully`);
+        if (fetchCategories) fetchCategories();
         setOpenNewCategoryModel(false);
       } else {
         toast.error(data.message);
@@ -60,7 +74,7 @@ const NewCategory = ({ setOpenNewCategoryModel }) => {
       <header className="mb-8 flex justify-between items-start">
         <div>
           <h2 className="text-2xl font-bold text-[#f4be78]">
-            Category Configuration
+            {categoryToEdit ? "Edit Category" : "Category Configuration"}
           </h2>
           <p className="text-[#295c5e] text-sm">
             Define your category details and search visibility.
@@ -188,7 +202,7 @@ const NewCategory = ({ setOpenNewCategoryModel }) => {
             type="button"
             className="px-10 py-3 bg-[#d96c4e] hover:bg-[#c45a3d] text-white font-bold rounded-xl shadow-lg shadow-[#d96c4e]/20 active:scale-95 transition-all"
           >
-            Publish Category
+            {categoryToEdit ? "Update Category" : "Publish Category"}
           </button>
         </div>
       </form>
