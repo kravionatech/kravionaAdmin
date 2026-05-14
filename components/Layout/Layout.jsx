@@ -8,11 +8,14 @@ import {
   Menu,
   X,
   ChevronRight,
+  CheckCheck,
 } from "lucide-react";
 import { menuList } from "../../utils/menuList.jsx"; // Adjust path if necessary
 
 const Layout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [unreadNotifs, setUnreadNotifs] = useState(3);
   const location = useLocation();
   const navigate = useNavigate(); // Used for the logout redirect
 
@@ -150,11 +153,72 @@ const Layout = ({ children }) => {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 lg:gap-4">
-            <button className="p-2.5 text-gray-500 hover:bg-gray-100 rounded-xl relative transition-all">
-              <Bell size={20} />
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
-            </button>
+          <div className="flex items-center gap-2 lg:gap-4 relative">
+            <div className="relative">
+              <button
+                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                className="p-2.5 text-gray-500 hover:bg-gray-100 rounded-xl relative transition-all cursor-pointer"
+                title="View Notifications"
+              >
+                <Bell size={20} className={unreadNotifs > 0 ? "text-rose-600 animate-wiggle" : ""} />
+                {unreadNotifs > 0 && (
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white animate-pulse"></span>
+                )}
+              </button>
+
+              {/* Popover Dropdown */}
+              {isNotifOpen && (
+                <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-3xl shadow-2xl border border-gray-100 py-3 z-50 animate-in fade-in zoom-in-95 duration-200">
+                  <div className="px-4 py-2 border-b border-gray-50 flex items-center justify-between">
+                    <span className="font-bold text-sm text-gray-900">Notifications</span>
+                    {unreadNotifs > 0 && (
+                      <button
+                        onClick={() => setUnreadNotifs(0)}
+                        className="text-[11px] font-semibold text-[#295c5e] hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <CheckCheck size={12} /> Mark read
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="max-h-64 overflow-y-auto divide-y divide-gray-50 custom-scrollbar">
+                    {unreadNotifs > 0 ? (
+                      <>
+                        <div className="p-3 hover:bg-gray-50/80 transition-colors block text-left">
+                          <p className="text-xs font-bold text-gray-800">New message from Alice</p>
+                          <p className="text-[11px] text-gray-500 truncate mt-0.5">Enquiring about enterprise software timelines.</p>
+                          <span className="text-[9px] text-gray-400 mt-1 block">15m ago</span>
+                        </div>
+                        <div className="p-3 hover:bg-gray-50/80 transition-colors block text-left">
+                          <p className="text-xs font-bold text-gray-800">New Newsletter Subscriber</p>
+                          <p className="text-[11px] text-gray-500 truncate mt-0.5">contact@anandsindhu.com joined the global list.</p>
+                          <span className="text-[9px] text-gray-400 mt-1 block">45m ago</span>
+                        </div>
+                        <div className="p-3 hover:bg-gray-50/80 transition-colors block text-left">
+                          <p className="text-xs font-bold text-gray-800">High Memory Utilization</p>
+                          <p className="text-[11px] text-gray-500 truncate mt-0.5">Server node-alpha reached 82% memory threshold.</p>
+                          <span className="text-[9px] text-gray-400 mt-1 block">2h ago</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="py-8 text-center text-xs text-gray-400 font-medium">
+                        No unread notifications
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="px-4 pt-2 border-t border-gray-50 text-center">
+                    <Link
+                      to="/notifications"
+                      onClick={() => setIsNotifOpen(false)}
+                      className="text-xs font-bold text-[#295c5e] hover:underline block py-1"
+                    >
+                      View all notifications
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div className="h-8 w-[1px] bg-gray-200 mx-2 hidden sm:block"></div>
 

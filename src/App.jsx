@@ -24,6 +24,8 @@ import Team from "../components/Team/Team";
 import Analytics from "../components/Analytics/Analytics";
 import Campaigns from "../components/Campaigns/Campaigns";
 import AuditLogs from "../components/AuditLogs/AuditLogs";
+import UsersManagement from "../components/Users/Users";
+import Notifications from "../components/Notifications/Notifications";
 import { DependencyError } from "../config/config";
 
 
@@ -72,9 +74,11 @@ const App = () => {
           <Route path="/projects" element={<Projects />} />
           <Route path="/testimonials" element={<Testimonials />} />
           <Route path="/team" element={<Team />} />
+          <Route path="/users" element={<UsersManagement />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/campaigns" element={<Campaigns />} />
           <Route path="/audit-logs" element={<AuditLogs />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/missing"element={<DependencyError/>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

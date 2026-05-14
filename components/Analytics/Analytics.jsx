@@ -24,7 +24,7 @@ const Analytics = () => {
 
       if (overviewData.success) setOverview(overviewData.data);
       if (realtimeData.success) setRealtime(realtimeData.data?.activeVisitors || 0);
-    } catch (error) {
+    } catch {
       toast.error("Failed to load analytics");
     } finally {
       setIsLoading(false);
@@ -42,7 +42,7 @@ const Analytics = () => {
         });
         const data = await res.json();
         if (data.success) setRealtime(data.data?.activeVisitors || 0);
-      } catch (e) {}
+      } catch { /* ignore */ }
     }, 30000);
     
     return () => clearInterval(interval);

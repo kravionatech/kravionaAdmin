@@ -86,7 +86,7 @@ const TeamModal = ({ isOpen, onClose, fetchTeam, memberToEdit }) => {
       } else {
         toast.error(data.message || 'Something went wrong');
       }
-    } catch (error) {
+    } catch {
       toast.error('Network error. Please try again.');
     } finally {
       setIsSubmitting(false);

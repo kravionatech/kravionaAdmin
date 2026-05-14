@@ -11,6 +11,8 @@ import {
   UsersRound,
   Mail,
   ShieldAlert,
+  UserCog,
+  Bell,
 } from "lucide-react";
 
 export const menuList = [
@@ -50,6 +52,11 @@ export const menuList = [
     icon: <UsersRound size={20} />,
   },
   {
+    name: "Users",
+    href: "/users",
+    icon: <UserCog size={20} />,
+  },
+  {
     name: "Subscribers",
     href: "/subscriber",
     icon: <Users size={20} />,
@@ -58,6 +65,11 @@ export const menuList = [
     name: "Messages",
     href: "/messages",
     icon: <MessageSquare size={20} />,
+  },
+  {
+    name: "Notifications",
+    href: "/notifications",
+    icon: <Bell size={20} />,
   },
   {
     name: "Media Library",
